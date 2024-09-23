@@ -9,14 +9,23 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
     for node in old_nodes_copy:
         if delimiter not in node.text:
             new_nodes.append(node)
+        if node.url != None:
+            new_nodes.append(node)
         else:
             temp_list = node.text.split(delimiter)
-            alternating_bool = True
-            for item in temp_list:
+            if temp_list[0] == "":
+                temp_list.pop(0)
+            if temp_list[-1] == "":
+                temp_list.pop(-1)
+            if (node.text[:1] == delimiter) or (node.text[:2] == delimiter):
+                alternating_bool = False
+            else:
+                alternating_bool = True
+            for i in range(0, len(temp_list)):
                 if alternating_bool == True:
-                    item = TextNode(item, "text")
+                    temp_list[i] = TextNode(temp_list[i], "text")
                 elif alternating_bool == False:
-                    item = TextNode(item, text_type)
+                    temp_list[i] = TextNode(temp_list[i], text_type)
                 alternating_bool = (alternating_bool == False)
             new_nodes.extend(temp_list)
     return new_nodes
