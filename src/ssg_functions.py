@@ -39,8 +39,63 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
     return new_nodes
 
 def split_nodes_image(old_nodes):
+    
+    def merge_text_img_nodes(img_list, node_text):
+        if img_list == []:
+            return [TextNode(node_text, "text")]
+        
+        temp_list = []
+        img = img_list.pop(0)
+        node_text_split = node_text.split(f"![{img[0]}]({img[1]})")
+        temp_list.append(TextNode(node_text_split[0], "text"))
+        temp_list.append(TextNode(img[0], "image", img[1]))
+        temp_list.extend(merge_text_img_nodes(img_list, node_text_split[1]))
+        return temp_list
+
+    
     old_nodes_copy = old_nodes
     new_nodes = []
-    
+    for node in old_nodes_copy:
+        img_list = extract_markdown_images(node.text)
+        node_text = node.text
+        if img_list == []:
+            new_nodes.append(node)
+        else:
+            new_nodes.extend(merge_text_img_nodes(img_list, node_text))
+
+    for node in new_nodes:
+        if node.text == "":
+            new_nodes.remove(node)
+
+    return new_nodes
+
 def split_nodes_link(old_nodes):
-    pass
+    
+    def merge_text_link_nodes(link_list, node_text):
+        if link_list == []:
+            return [TextNode(node_text, "text")]
+        
+        temp_list = []
+        link = link_list.pop(0)
+        node_text_split = node_text.split(f"[{link[0]}]({link[1]})")
+        temp_list.append(TextNode(node_text_split[0], "text"))
+        temp_list.append(TextNode(link[0], "link", link[1]))
+        temp_list.extend(merge_text_link_nodes(link_list, node_text_split[1]))
+        return temp_list
+
+    
+    old_nodes_copy = old_nodes
+    new_nodes = []
+    for node in old_nodes_copy:
+        link_list = extract_markdown_links(node.text)
+        node_text = node.text
+        if link_list == []:
+            new_nodes.append(node)
+        else:
+            new_nodes.extend(merge_text_link_nodes(link_list, node_text))
+
+    for node in new_nodes:
+        if node.text == "":
+            new_nodes.remove(node)
+
+    return new_nodes
