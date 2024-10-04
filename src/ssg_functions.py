@@ -17,7 +17,7 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
     for node in old_nodes_copy:
         if delimiter not in node.text:
             new_nodes.append(node)
-        if node.url != None:
+        elif node.url != None:
             new_nodes.append(node)
         else:
             temp_list = node.text.split(delimiter)
@@ -99,3 +99,19 @@ def split_nodes_link(old_nodes):
             new_nodes.remove(node)
 
     return new_nodes
+
+def split_bold_nodes(old_nodes):
+    return split_nodes_delimiter(old_nodes, "**", "bold")
+
+def split_italic_nodes(old_nodes):
+    return split_nodes_delimiter(old_nodes, "*", "italic")
+
+def split_code_nodes(old_nodes):
+    return split_nodes_delimiter(old_nodes, "`", "code")
+
+def text_to_textnodes(text):
+    nodes = [TextNode(text, "text")]
+    function_list = [split_bold_nodes, split_italic_nodes, split_code_nodes, split_nodes_image, split_nodes_link]
+    for fxn in function_list:
+        nodes = fxn(nodes)
+    return nodes
