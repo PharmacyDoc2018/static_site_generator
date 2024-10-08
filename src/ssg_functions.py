@@ -115,3 +115,22 @@ def text_to_textnodes(text):
     for fxn in function_list:
         nodes = fxn(nodes)
     return nodes
+
+def markdown_to_blocks(markdown):
+    block_list = markdown.split("\n")
+    filtered_list = []
+    for block in block_list:
+        if block == "":
+            pass
+        else:
+            filtered_list.append(block.strip())
+    return filtered_list
+
+def block_to_block_type(block):
+    block_type = "paragraph"
+    if re.findall(r"#{1,6} ", block) != []:
+        block_type = "heading"
+    elif re.findall(r"\`{3}(.*?)\`{3}", block) != []:
+        block_type = "code"
+
+    return block_type
