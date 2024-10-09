@@ -117,20 +117,64 @@ def text_to_textnodes(text):
     return nodes
 
 def markdown_to_blocks(markdown):
-    block_list = markdown.split("\n")
-    filtered_list = []
+    block_list = markdown.split("\n\n")
+    filtered_list_1 = []
+    filtered_list_2 = []
     for block in block_list:
         if block == "":
             pass
         else:
-            filtered_list.append(block.strip())
-    return filtered_list
+            filtered_list_1.append(block.strip())
+    for item in filtered_list_1:
+        item_split = item.split("\n")
+        if len(item_split) > 1:
+            items_joined = []
+            for i in item_split:
+                items_joined.append(i.strip())
+            filtered_list_2.append("\n".join(items_joined))
+        else:
+            filtered_list_2.append(item)
+    return filtered_list_2
 
 def block_to_block_type(block):
-    block_type = "paragraph"
-    if re.findall(r"#{1,6} ", block) != []:
+    block_split = block.split("\n")
+    
+    is_quote = True                                    #
+    for item in block_split:                           # identifies
+        if re.fullmatch(r"\>(.*?)", item) == None:     # quotes
+            is_quote = False                           #
+    
+    is_star_list = True                                #
+    is_dash_list = True                                #
+    for item in block_split:                           # identifies
+        if re.fullmatch(r"\* (.*?)", item) == None:    # unordered
+            is_star_list = False                       # lists
+    for item in block_split:                           #
+        if re.fullmatch(r"\- (.*?)", item) == None:    #
+            is_dash_list = False                       #
+    
+    is_ordered_list = True
+    num_list = re.findall(r"\d. ", block)
+    if len(num_list) == 0:
+        is_ordered_list = False
+    else:
+        i = 1
+        for num in num_list:
+            if num != f"{i}. ":
+                is_ordered_list = False
+            i += 1
+            
+    if re.findall(r"#{1,6} ", block) != []: #identifies headings
         block_type = "heading"
-    elif re.findall(r"\`{3}(.*?)\`{3}", block) != []:
+    elif re.findall(r"\`{3}(.*?)\`{3}", block) != []: #identifies code
         block_type = "code"
+    elif is_quote == True:
+        block_type = "quote"
+    elif (is_star_list == True) or (is_dash_list == True):
+        block_type = "unordered_list"
+    elif is_ordered_list == True:
+        block_type = "ordered_list"
+    else:
+        block_type = "paragraph"
 
     return block_type

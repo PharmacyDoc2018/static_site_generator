@@ -13,6 +13,7 @@ class TestMarkdownToBlocks(unittest.TestCase):
         * This is another list item"""
 
         test_blocks = markdown_to_blocks(s)
+
         for block in test_blocks:
             self.assertNotEqual(block,"")
             self.assertNotEqual(block[0]," ")

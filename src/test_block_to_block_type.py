@@ -14,3 +14,21 @@ class TestBlockToBlockType(unittest.TestCase):
         self.assertEqual(block_to_block_type(block), "code")
         block = "``` will spaces mess it up? ```"
         self.assertEqual(block_to_block_type(block), "code")
+
+    def test_quote(self):
+        block = ">To be or not to be"
+        self.assertEqual(block_to_block_type(block), "quote")
+        block = ">To be or not to be\n>That is the question"
+        self.assertEqual(block_to_block_type(block), "quote")
+
+    def test_unordered_list(self):
+        block = "* list item in no particular order"
+        self.assertEqual(block_to_block_type(block), "unordered_list")
+        block = "* list item in no particular order\n* second item in the list"
+        self.assertEqual(block_to_block_type(block), "unordered_list")
+        block = "*invalid unordered list attempt"
+        self.assertEqual(block_to_block_type(block), "paragraph")
+
+    def test_ordered_list(self):
+        block = "1. one\n2. two\n3. three"
+        self.assertEqual(block_to_block_type(block), "ordered_list")
