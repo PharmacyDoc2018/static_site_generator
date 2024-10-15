@@ -32,3 +32,5 @@ class TestBlockToBlockType(unittest.TestCase):
     def test_ordered_list(self):
         block = "1. one\n2. two\n3. three"
         self.assertEqual(block_to_block_type(block), "ordered_list")
+        block = "1. one\n3. three\n 2. two"
+        self.assertEqual(block_to_block_type(block), "paragraph")

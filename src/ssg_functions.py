@@ -1,6 +1,24 @@
 import re
 
 from textnode import TextNode
+from leafnode import LeafNode
+from parentnode import ParentNode
+
+def text_node_to_html_node(text_node):
+    if text_node.text_type == "text":
+        return LeafNode(None, text_node.text, None)
+    elif text_node.text_type == "bold":
+        return LeafNode("b", text_node.text, None)
+    elif text_node.text_type == "italic":
+        return LeafNode("i", text_node.text, None)
+    elif text_node.text_type == "code":
+        return LeafNode("code", text_node.text, None)
+    elif text_node.text_type == "link":
+        return LeafNode("a", text_node.text, {"href": text_node.url})
+    elif text_node.text_type == "image":
+        return LeafNode("img", "", {"src": text_node.url, "alt": text_node.text})
+    else:
+        raise Exception("Invalid text type")
 
 def extract_markdown_images(text):
     return re.findall(r"!\[(.*?)\]\((.*?)\)", text)
@@ -18,6 +36,8 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
         if delimiter not in node.text:
             new_nodes.append(node)
         elif node.url != None:
+            new_nodes.append(node)
+        elif node.text.count(delimiter) < 2:
             new_nodes.append(node)
         else:
             temp_list = node.text.split(delimiter)
@@ -178,3 +198,75 @@ def block_to_block_type(block):
         block_type = "paragraph"
 
     return block_type
+
+def markdown_to_html_node(markdown):
+    markdown_blocks = markdown_to_blocks(markdown)
+    HTML_node_list = []
+    for block in markdown_blocks:
+        HTML_node_list.append(block_to_html_node(block))
+    return ParentNode("div", HTML_node_list)
+        
+def block_to_html_node(block):
+
+    block_type = block_to_block_type(block)
+    tag = None
+    if block_type == "quote":
+        node = ParentNode("blockquote", text_to_children(block, block_type))
+    elif block_type == "unordered_list":
+        node = ParentNode("ul",text_to_children(block, block_type))
+    elif block_type == "ordered_list":
+        node = ParentNode("ol",text_to_children(block, block_type))
+    elif block_type == "code":
+        node = ParentNode("pre", text_to_children(block, block_type))
+    elif block_type == "heading":
+        hash_num = block.count("#")
+        node = ParentNode(f"h{hash_num}", text_to_children(block, block_type))
+    elif block_type == "paragraph":
+        node = ParentNode("p", text_to_children(block, block_type))
+    else:
+        raise Exception("Invalid block")
+    
+    return node
+
+def text_to_children(text, block_type):
+    child_list = []
+    if block_type == "quote":
+        text_node_list = text_to_textnodes(text)
+        for node in text_node_list:
+            child_list.append(text_node_to_html_node(node))
+
+    elif block_type == "unordered_list":
+        temp_list = text.split("\n")
+        for item in temp_list:
+            #text_node_list = text_to_textnodes(item[2:]) not sure about clipping the - or * 
+            text_node_list = text_to_textnodes(item)
+            html_node_list = []
+            for node in text_node_list:
+                html_node_list.append(text_node_to_html_node(node))
+            child_list.append(ParentNode("li", html_node_list))
+
+    elif block_type == "ordered_list":
+        temp_list = text.split("\n")
+        for item in temp_list:
+            text_node_list = text_to_textnodes(item)
+            html_node_list = []
+            for node in text_node_list:
+                html_node_list.append(text_node_to_html_node(node))
+            child_list.append(ParentNode("li", html_node_list))
+
+    elif block_type == "code":
+        text_node_list = text_to_textnodes(text)
+        for node in text_node_list:
+            child_list.append(text_node_to_html_node(node))
+
+    elif block_type == "heading":
+        text_node_list = text_to_textnodes(text.lstrip("# "))
+        for node in text_node_list:
+            child_list.append(text_node_to_html_node(node))
+
+    elif block_type == "paragraph":
+        text_node_list = text_to_textnodes(text)
+        for node in text_node_list:
+            child_list.append(text_node_to_html_node(node))
+
+    return child_list
