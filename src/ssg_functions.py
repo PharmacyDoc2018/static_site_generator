@@ -270,3 +270,6 @@ def text_to_children(text, block_type):
             child_list.append(text_node_to_html_node(node))
 
     return child_list
+
+def copy_static_to_public():
+    pass #testing git pull 
