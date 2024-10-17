@@ -240,8 +240,8 @@ def text_to_children(text, block_type):
     elif block_type == "unordered_list":
         temp_list = text.split("\n")
         for item in temp_list:
-            #text_node_list = text_to_textnodes(item[2:]) not sure about clipping the - or * 
-            text_node_list = text_to_textnodes(item)
+            text_node_list = text_to_textnodes(item[2:])
+            #text_node_list = text_to_textnodes(item)
             html_node_list = []
             for node in text_node_list:
                 html_node_list.append(text_node_to_html_node(node))
@@ -250,7 +250,7 @@ def text_to_children(text, block_type):
     elif block_type == "ordered_list":
         temp_list = text.split("\n")
         for item in temp_list:
-            text_node_list = text_to_textnodes(item)
+            text_node_list = text_to_textnodes(item[3:])
             html_node_list = []
             for node in text_node_list:
                 html_node_list.append(text_node_to_html_node(node))
@@ -287,3 +287,27 @@ def copy_static_to_public():
                 copy_files(os.path.join(path_copy, item), os.path.join(path_paste, item))
             
     copy_files("static/", "public/")
+
+def extract_title(markdown):
+    title_list = re.findall(r"(?<!#)#{1} (.*)", markdown)
+    if title_list == []:
+        raise Exception("Title not found")
+    else:
+        return title_list[0]
+    
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}.")
+    from_file = open(from_path)
+    template_file = open(template_path).read()
+    dest_file = open(dest_path, "w")
+
+    from_markdown = from_file.read()
+    from_html = markdown_to_html_node(from_markdown).to_html()
+    temp_file = template_file.replace("{{ Title }}", extract_title(from_markdown))
+    html_file = temp_file.replace("{{ Content }}", from_html)
+    dest_file.write(html_file)
+
+    from_file.close()
+    dest_file.close()
+    
+    
