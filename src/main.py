@@ -1,7 +1,6 @@
 from textnode import *
-
+from ssg_functions import copy_static_to_public
 def main():
-    test_textnode = TextNode("This is a text node", "bold", "htpps://www.boot.dev")
-    print(test_textnode)
+    copy_static_to_public()
 
 main()

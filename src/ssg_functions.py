@@ -1,4 +1,6 @@
 import re
+import shutil
+import os
 
 from textnode import TextNode
 from leafnode import LeafNode
@@ -272,4 +274,16 @@ def text_to_children(text, block_type):
     return child_list
 
 def copy_static_to_public():
-    pass #testing git pull 
+    if os.path.exists("public/"):
+        shutil.rmtree("public/")
+    os.mkdir("public/")
+    
+    def copy_files(path_copy, path_paste):
+        for item in os.listdir(path_copy):
+            if os.path.isfile(os.path.join(path_copy, item)):
+                shutil.copy(os.path.join(path_copy, item), path_paste)
+            elif os.path.isdir(os.path.join(path_copy, item )):
+                os.mkdir(os.path.join(path_paste, item))
+                copy_files(os.path.join(path_copy, item), os.path.join(path_paste, item))
+            
+    copy_files("static/", "public/")
