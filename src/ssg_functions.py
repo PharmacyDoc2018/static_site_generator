@@ -233,7 +233,7 @@ def block_to_html_node(block):
 def text_to_children(text, block_type):
     child_list = []
     if block_type == "quote":
-        text_node_list = text_to_textnodes(text)
+        text_node_list = text_to_textnodes(text[2:])
         for node in text_node_list:
             child_list.append(text_node_to_html_node(node))
 
@@ -250,7 +250,7 @@ def text_to_children(text, block_type):
     elif block_type == "ordered_list":
         temp_list = text.split("\n")
         for item in temp_list:
-            text_node_list = text_to_textnodes(item[3:])
+            text_node_list = text_to_textnodes(item[3:]) # might need to make this account for numbers greater than 9
             html_node_list = []
             for node in text_node_list:
                 html_node_list.append(text_node_to_html_node(node))
