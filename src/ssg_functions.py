@@ -273,19 +273,19 @@ def text_to_children(text, block_type):
 
     return child_list
 
+def copy_files(path_copy, path_paste):
+    for item in os.listdir(path_copy):
+        if os.path.isfile(os.path.join(path_copy, item)):
+            shutil.copy(os.path.join(path_copy, item), path_paste)
+        elif os.path.isdir(os.path.join(path_copy, item )):
+            os.mkdir(os.path.join(path_paste, item))
+            copy_files(os.path.join(path_copy, item), os.path.join(path_paste, item))
+
 def copy_static_to_public():
     if os.path.exists("public/"):
         shutil.rmtree("public/")
     os.mkdir("public/")
     
-    def copy_files(path_copy, path_paste):
-        for item in os.listdir(path_copy):
-            if os.path.isfile(os.path.join(path_copy, item)):
-                shutil.copy(os.path.join(path_copy, item), path_paste)
-            elif os.path.isdir(os.path.join(path_copy, item )):
-                os.mkdir(os.path.join(path_paste, item))
-                copy_files(os.path.join(path_copy, item), os.path.join(path_paste, item))
-            
     copy_files("static/", "public/")
 
 def extract_title(markdown):
@@ -309,5 +309,18 @@ def generate_page(from_path, template_path, dest_path):
 
     from_file.close()
     dest_file.close()
+
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    for item in os.listdir(dir_path_content):
+        if os.path.isfile(os.path.join(dir_path_content, item)):
+            item_split = item.split(".")
+            if item_split[1] == "md":
+                item_html = ".".join([item_split[0], "html"])
+                generate_page(os.path.join(dir_path_content, item), template_path, os.path.join(dest_dir_path, item_html))
+            else:
+                shutil.copy(os.path.join(dir_path_content, item), dest_dir_path)
+        elif os.path.isdir(os.path.join(dir_path_content, item)):
+            os.mkdir(os.path.join(dest_dir_path, item))
+            generate_pages_recursive(os.path.join(dir_path_content, item), template_path, os.path.join(dest_dir_path, item))
     
     
