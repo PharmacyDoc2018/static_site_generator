@@ -233,7 +233,9 @@ def block_to_html_node(block):
 def text_to_children(text, block_type):
     child_list = []
     if block_type == "quote":
-        text_node_list = text_to_textnodes(text[2:])
+        text_split = text.split("> ")
+        text = "".join(text_split)
+        text_node_list = text_to_textnodes(text)
         for node in text_node_list:
             child_list.append(text_node_to_html_node(node))
 
